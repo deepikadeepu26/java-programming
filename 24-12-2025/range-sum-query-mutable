@@ -1,0 +1,59 @@
+class NumArray {
+
+    static int ans[];
+    static int n;
+
+    static void build_Tree(int arr[], int l, int h, int idx){
+        if(l==h){
+            ans[idx] = arr[l];
+            return;
+        }
+
+        int mid = l+(h-l)/2;
+        build_Tree(arr,l,mid,2*idx+1);
+        build_Tree(arr,mid+1,h,2*idx+2);
+        ans[idx] = ans[2*idx+1]+ans[2*idx+2];
+    }
+
+    static int range_query(int low, int high, int l, int r, int idx){
+        if(low>=l && high<=r) return ans[idx];
+        if(r<low || l>high) return 0;
+        
+        int mid = low+(high-low)/2;
+        int a = range_query(low,mid,l,r,2*idx+1);
+        int b = range_query(mid+1,high,l,r,2*idx+2);
+        return a+b;
+    }
+
+    public NumArray(int[] nums) {
+        n = nums.length;
+        ans = new int[4*n];
+        build_Tree(nums,0,n-1,0);
+    }
+
+    static void update_change(int low, int high, int i, int val,int idx){
+        if(low==high){
+            ans[idx] = val;
+            return;
+        } 
+        int mid = low+(high-low)/2;
+        if(i<=mid) update_change(low,mid,i,val,2*idx+1);
+        else update_change(mid+1,high,i,val,2*idx+2);
+        ans[idx] = ans[2*idx+1]+ans[2*idx+2];
+    }
+    
+    public void update(int idx, int val) {
+        update_change(0,n-1,idx,val,0);
+    }
+    
+    public int sumRange(int left, int right) {
+        return range_query(0,n-1,left,right,0);
+    }
+}
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(index,val);
+ * int param_2 = obj.sumRange(left,right);
+ */
